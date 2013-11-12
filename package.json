@@ -1,0 +1,29 @@
+{
+  "name": "sparsematricesconverter",
+  "version": "0.0.0",
+  "description": "Converts collection of sparse matrices from University of Florida to NPM format",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/anvaka/sparsematricesconverter.git"
+  },
+  "keywords": [
+    "sparse",
+    "matrix",
+    "converter"
+  ],
+  "author": "Andrei Kashcha",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/anvaka/sparsematricesconverter/issues"
+  },
+  "dependencies": {
+    "ngraph.serialization": "0.0.1",
+    "optimist": "~0.6.0",
+    "readdirp": "~0.3.1",
+    "mkdirp": "~0.3.5"
+  }
+}
