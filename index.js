@@ -19,17 +19,59 @@ readdirp({ root: argv.src, fileFilter: mtxFileFilter })
 
 function convertToNPMEntry(mtxFileEntry) {
   console.log('Processing ' + mtxFileEntry.fullPath);
-  var mtxFile = fs.readFileSync(mtxFileEntry.fullPath, 'ascii');
-  var graph = mtxParser.load(mtxFile);
-  var storedGraph = mtxParser.saveToObject(graph);
+  var mtxFile = fs.readFileSync(mtxFileEntry.fullPath, 'ascii'),
+      graph = mtxParser.load(mtxFile),
+      storedGraph = mtxParser.saveToObject(graph);
 
   var outDir = path.join(argv.out, mtxFileEntry.parentDir);
   mkdirp.sync(outDir);
 
-  var fileContent = 'module.exports = ' + JSON.stringify(storedGraph) + ';';
-  var saveTo = path.join(outDir, 'index.js');
+  var savedFileName = saveJavaScriptFile(storedGraph, outDir);
+  saveReadmeFile(graph.description, outDir);
+
+  console.log('Saved to ' + savedFileName + '; Vertices: ' + graph.getNodesCount() + '; Edges: ' + graph.getLinksCount());
+}
+
+function saveJavaScriptFile(graphObject, outDir) {
+  var fileContent = 'module.exports = ' + JSON.stringify(graphObject) + ';',
+      saveTo = path.join(outDir, 'index.js');
+
   fs.writeFileSync(saveTo, fileContent);
-  console.log('Saved to ' + saveTo + '; Vertices: ' + graph.getNodesCount() + '; Edges: ' + graph.getLinksCount());
+  return saveTo;
+}
+
+function saveReadmeFile(description, outDir) {
+  if (!description) { return; }
+
+  var saveTo = path.join(outDir, 'Readme.md');
+
+  var lines = description.split('\n'),
+      content = [],
+      name = '';
+  for (var i = 0; i < lines.length; ++i) {
+    if (!lines[i].length) {
+      continue;
+    }
+    var firstChar = lines[i][0];
+    if (firstChar === '%' || firstChar === '-') {
+      // Skip header and separators
+      continue;
+    } 
+    var nameMatch = lines[i].match(/ name: (.*)/);
+    if (nameMatch) {
+      name = nameMatch[1];
+    } else {
+      content.push(lines[i]);
+    }
+  }
+
+  if (name) {
+    content.unshift('# ' + name);
+    var thumbnail = 'http://www2.research.att.com/~yifanhu/GALLERY/GRAPHS/GIF_SMALL/' + name.replace('/', '@') + '.gif';
+    content.push('![' + name + '](' + thumbnail + ')');
+  }
+
+  fs.writeFileSync(saveTo, content.join('\n\n'));
 }
 
 function mtxFileFilter(fileEntry) {
