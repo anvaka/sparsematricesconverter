@@ -12,10 +12,18 @@ var readdirp = require('readdirp'),
     mkdirp = require('mkdirp'),
     mtxParser = require('ngraph.serialization/mtx'),
     fs = require('fs'),
+    allEntries = [],
     path = require('path');
 
 readdirp({ root: argv.src, fileFilter: mtxFileFilter })
-  .on('data', convertToNPMEntry);
+  .on('data', convertToNPMEntry)
+  .on('end', writeSummary);
+
+function writeSummary() {
+  var outDir = argv.out;
+  mkdirp.sync(outDir);
+  saveJavaScriptFile(allEntries, outDir);
+}
 
 function convertToNPMEntry(mtxFileEntry) {
   console.log('Processing ' + mtxFileEntry.fullPath);
@@ -26,9 +34,13 @@ function convertToNPMEntry(mtxFileEntry) {
   var outDir = path.join(argv.out, mtxFileEntry.parentDir);
   mkdirp.sync(outDir);
 
+  if (graph.description) {
+    storedGraph.description = graph.description;
+  }
   var savedFileName = saveJavaScriptFile(storedGraph, outDir);
   saveReadmeFile(graph.description, outDir);
 
+  allEntries.push(mtxFileEntry.parentDir);
   console.log('Saved to ' + savedFileName + '; Vertices: ' + graph.getNodesCount() + '; Edges: ' + graph.getLinksCount());
 }
 
