@@ -3,9 +3,15 @@ var argv = require('optimist')
     .demand('s')
     .alias('s', 'src')
     .describe('s', 'Path to /MM folder from public dataset ')
-    .default({'o': './out'})
-    .alias('o', 'out')
-    .describe('o', 'Path to outupt folder where results will be stored')
+    .boolean(['readme', 'cjs'])
+    .default({
+      'o': './out',
+      'r': true,
+      'c': true
+    })
+    .alias('o', 'out').describe('o', 'Path to outupt folder where results will be stored')
+    .alias('r', 'readme').describe('r', 'Generate readme file')
+    .alias('c', 'cjs').describe('c', 'Generate cjs file format output. If false - simple json is dumped')
     .argv;
 
 var readdirp = require('readdirp'),
@@ -16,14 +22,8 @@ var readdirp = require('readdirp'),
     path = require('path');
 
 readdirp({ root: argv.src, fileFilter: mtxFileFilter })
-  .on('data', convertToNPMEntry)
-  .on('end', writeSummary);
+  .on('data', convertToNPMEntry);
 
-function writeSummary() {
-  var outDir = argv.out;
-  mkdirp.sync(outDir);
-  saveJavaScriptFile(allEntries, outDir);
-}
 
 function convertToNPMEntry(mtxFileEntry) {
   console.log('Processing ' + mtxFileEntry.fullPath);
@@ -38,16 +38,22 @@ function convertToNPMEntry(mtxFileEntry) {
     storedGraph.description = graph.description;
   }
   var savedFileName = saveJavaScriptFile(storedGraph, outDir);
-  saveReadmeFile(graph.description, outDir);
+  if (argv.readme) {
+    saveReadmeFile(graph.description, outDir);
+  }
 
   allEntries.push(mtxFileEntry.parentDir);
   console.log('Saved to ' + savedFileName + '; Vertices: ' + graph.getNodesCount() + '; Edges: ' + graph.getLinksCount());
 }
 
 function saveJavaScriptFile(graphObject, outDir) {
-  var fileContent = 'module.exports = ' + JSON.stringify(graphObject) + ';',
+  var fileContent,
       saveTo = path.join(outDir, 'index.js');
-
+  if (argv.cjs) {
+    fileContent = 'module.exports = ' + JSON.stringify(graphObject) + ';';
+  } else {
+    fileContent = JSON.stringify(graphObject);
+  }
   fs.writeFileSync(saveTo, fileContent);
   return saveTo;
 }
