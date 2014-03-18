@@ -1,6 +1,6 @@
 {
   "name": "sparsematricesconverter",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Converts collection of sparse matrices from University of Florida to NPM format",
   "main": "index.js",
   "scripts": {
