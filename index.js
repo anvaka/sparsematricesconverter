@@ -85,7 +85,7 @@ function saveReadmeFile(description, outDir) {
 
   if (name) {
     content.unshift('# ' + name);
-    var thumbnail = 'http://www2.research.att.com/~yifanhu/GALLERY/GRAPHS/GIF_SMALL/' + name.replace('/', '@') + '.gif';
+    var thumbnail = 'http://yifanhu.net/GALLERY/GRAPHS/GIF_SMALL/' + name.replace('/', '@') + '.gif';
     content.push('![' + name + '](' + thumbnail + ')');
   }
 
