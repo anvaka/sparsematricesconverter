@@ -74,7 +74,7 @@ function saveReadmeFile(description, outDir) {
     if (firstChar === '%' || firstChar === '-') {
       // Skip header and separators
       continue;
-    } 
+    }
     var nameMatch = lines[i].match(/ name: (.*)/);
     if (nameMatch) {
       name = nameMatch[1];
